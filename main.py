@@ -53,4 +53,7 @@ crypto_id_param = crypto_id_param[:-1]
 parameter_id = {'id': crypto_id_param}
 
 currency_price = api_session(id_url, parameter_id)
+
+for currency in range(len(crypto_names_list)):
+    print("Current price of {} {}".format(crypto_names_list[currency],str(currency_price['data'][str(crypto_id[currency])]['quote']['USD']['price'])))
 print(currency_price)
