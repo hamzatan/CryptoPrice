@@ -8,29 +8,49 @@ headers = {
 }
 
 tickerList = r'/home/htanveer/Documents/tickerList.txt'
-cryptoTicker = []
+crypto_param_str = ''
 
+# Reads the tickerList file to grab the list of Crypto to search
 with open(tickerList, 'r') as file:
-    cryptoTicker = file.read()
+    crypto_param_str = file.read()
 
-print("CryptoPrice is running...")
-mapurl = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/map'
-idurl = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/map'
-session = Session()
-session.headers.update(headers)
-idData = ''
+# URL for API's
+# mapURL - Grab CMC ID of the currency
+# idURL - Grab ID relevant data from API
 
-try:
-    parameters = ''
-    for items in cryptoTicker:
-        parameters += ','.join(items)
+map_url = 'https://pro-api.coinmarketcap.com/v1/cryptocurrency/map'
+id_url = ' https://pro-api.coinmarketcap.com/v1/cryptocurrency/quotes/latest'
 
-    response = session.get(mapurl, param=parameters)
-    data = json.loads(response.text)
-    for outdata in data[data]:
-        idData = ','.join(outdata)
+crypto_param_str = crypto_param_str.replace('\n', ',')
+crypto_param_str = crypto_param_str[:-1]
 
-    response = session.get(idurl, param=parameters)
-except (ConnectionError, Timeout, TooManyRedirects) as e:
-    pass
+parameter_symbol = {'symbol': crypto_param_str}
+crypto_names_list = crypto_param_str.split(',')
 
+
+def api_session(url, parameters):
+    session = Session()
+    session.headers.update(headers)
+    try:
+        response = session.get(url, params=parameters)
+        data_symbol = json.loads(response.text)
+        return data_symbol
+    except (ConnectionError, Timeout, TooManyRedirects) as e:
+        print("Error: ", e)
+
+
+currency_id = api_session(map_url, parameter_symbol)
+crypto_id = []
+
+for index in range(len(crypto_names_list)):
+    crypto_id.append(currency_id['data'][index]['id'])
+
+crypto_id_param = ''
+
+for item in crypto_id:
+    crypto_id_param = crypto_id_param + str(item) + ','
+crypto_id_param = crypto_id_param[:-1]
+parameter_id = {'id': crypto_id_param}
+
+currency_price = api_session(id_url, parameter_id)
+print(currency_price)
