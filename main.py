@@ -1,6 +1,7 @@
 from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
+import web_hook as web
 
 headers = {
     'Accepts': 'application/json',
@@ -8,7 +9,6 @@ headers = {
 }
 
 tickerList = r'/home/htanveer/Documents/tickerList.txt'
-crypto_param_str = ''
 
 # Reads the tickerList file to grab the list of Crypto to search
 with open(tickerList, 'r') as file:
@@ -40,20 +40,24 @@ def api_session(url, parameters):
 
 
 currency_id = api_session(map_url, parameter_symbol)
-crypto_id = []
 
-for index in range(len(crypto_names_list)):
-    crypto_id.append(currency_id['data'][index]['id'])
+crypto_id = [currency_id['data'][index]['id'] for index in range(len(crypto_names_list))]
+crypto_id_param = (','.join(f'{id_crypto}' for id_crypto in crypto_id))
 
-crypto_id_param = ''
-
-for item in crypto_id:
-    crypto_id_param = crypto_id_param + str(item) + ','
-crypto_id_param = crypto_id_param[:-1]
 parameter_id = {'id': crypto_id_param}
 
 currency_price = api_session(id_url, parameter_id)
 
+currency_price_dict = {}
+
 for currency in range(len(crypto_names_list)):
-    print("Current price of {} {}".format(crypto_names_list[currency],str(currency_price['data'][str(crypto_id[currency])]['quote']['USD']['price'])))
+    print("Current price of {} {}".format(crypto_names_list[currency], str(
+        currency_price['data'][str(crypto_id[currency])]['quote']['USD']['price'])))
+    currency_price_dict[str(crypto_names_list[currency])] = \
+        currency_price['data'][str(crypto_id[currency])]['quote']['USD']['price']
+
+if currency_price_dict["BTC"] > 10000:
+    print("Price is greater than 10000")
+    # web
+
 print(currency_price)
