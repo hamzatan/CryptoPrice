@@ -2,13 +2,15 @@ from requests import Request, Session
 from requests.exceptions import ConnectionError, Timeout, TooManyRedirects
 import json
 import web_hook as web
+import os
 
+api_key = os.environ.get('coincap_api_key')
 headers = {
     'Accepts': 'application/json',
-    'X-CMC_PRO_API_KEY': 'dac2a887-1990-486d-a476-dd8dcf037a61'
+    'X-CMC_PRO_API_KEY': api_key
 }
 
-tickerList = r'/home/htanveer/Documents/tickerList.txt'
+tickerList = r'ticketList.txt'
 
 # Reads the tickerList file to grab the list of Crypto to search
 with open(tickerList, 'r') as file:
